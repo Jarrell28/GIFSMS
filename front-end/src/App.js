@@ -1,25 +1,32 @@
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
+import Chat from './chat.js'
+import Login from './login.js'
+import { withAuth0 } from '@auth0/auth0-react';
+import React from 'react';
 
-function App() {
-  return (
+class App extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      user: {}
+    }
+  }
+render() {
+return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        {/* <img src={logo} className="App-logo" alt="logo" /> */}
       </header>
+      <body>
+        {!this.props.auth0.isAuthenticated
+        ? <Login />
+        : <Chat />}
+      </body>
     </div>
   );
 }
+  
+}
 
-export default App;
+export default withAuth0(App);
