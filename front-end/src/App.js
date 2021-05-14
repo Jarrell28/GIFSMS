@@ -21,7 +21,7 @@ return (
       <body>
         {!this.props.auth0.isAuthenticated
         ? <Login />
-        : <Chat />}
+        : <Chat profile={this.user} />}
       </body>
     </div>
   );
