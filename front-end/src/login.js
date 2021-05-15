@@ -8,9 +8,12 @@ function LoginButton() {
     const {isAuthenticated, loginWithRedirect} = useAuth0()
 
     return !isAuthenticated &&(
-        <button color='red' onClick={loginWithRedirect}>
+        <div class='login-box'>
+            <button color='red' onClick={loginWithRedirect}>
             Login Here
-        </button>
+            </button>
+        </div>
+        
     )
 
 }

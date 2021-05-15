@@ -1,20 +1,20 @@
 
-import { createSocket } from 'node:dgram';
+
 import React from 'react';
 
 const io = require('socket.io-client');
 require('dotenv').config();
-const HOST = REACT_APP_HOST
-const socket = io.connect(`${HOST}/gifs`);
+const HOST = process.envREACT_APP_HOST || 'http://localhost:3001';
+const socket = io.connect(`http://localhost:3001/gifs`);
 
 
-
+ 
 
 
 class ChatWindow extends React.Component {
     constructor(props){
         super(props);
-        // this.socket = socket
+        this.socket = socket
         this.state = {
             gifSearch: '',
             searchArray:[]
@@ -22,31 +22,25 @@ class ChatWindow extends React.Component {
     }
 
     componentDidMount(){
-        
-        
-        socket.emit('join', {name: this.props.profile, room: this.props.profile.username})}
+        console.log("MOUNTING")
+        socket.emit('join', {name: "It'sa me" , room: "It'sa me" }).then(console.log('emitted'))
+     
+    }
 
+    submitGif(e){
+        e.preventDefault();
+        socket.emit('message', { message: this.state.gifSearch, user: "It'sa me" });
+    }
 
-
-// ChatLog(array) {
-
-//     let logs = array.forEach(el =>{
-//         if (this.state.searchArray.length>0){
-//             return (
-//             <div>
-//                 <img src={el.src} />
-//                 <p>{el.username}</p>
-//             </div>
-//         )
-//         }
-//     })
-
-//     return logs
-
-// }
 
 render(){
-    
+       socket.on('user joined', payload => {
+            this.props.setter(payload.user)
+            console.log("User Joined Room: ", payload.user); //Sends notification of user name that join
+        })
+        socket.on('message', payload => {
+            console.log(payload);
+        });
     return (
         <>
         <div>
@@ -62,7 +56,7 @@ render(){
             : <></>}
         </div>
         <input placeholder="what's you're moving mood?" onChange={(e) => this.setState({gifSearch: e.target.value})}></input>
-        <button onClick={(e) => console.log(this.state.gifSearch)}>state change?</button>
+        <button onClick={socket.emit('join', {name: "It'sa me" , room: "It'sa me" })}>state change?</button>
         </>
     )
 }

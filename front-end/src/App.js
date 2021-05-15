@@ -1,4 +1,4 @@
-// import logo from './logo.svg';
+
 import './App.css';
 import Chat from './chat.js'
 import Login from './login.js'
@@ -12,6 +12,11 @@ class App extends React.Component {
       user: {}
     }
   }
+
+  userSetter(info) {
+    this.setState({user: {info}})
+  }
+
 render() {
 return (
     <div className="App">
@@ -21,7 +26,7 @@ return (
       <body>
         {!this.props.auth0.isAuthenticated
         ? <Login />
-        : <Chat profile={this.user} />}
+        : <Chat profile={this.user} setter={this.userSetter} />}
       </body>
     </div>
   );
