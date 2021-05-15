@@ -1,10 +1,11 @@
 
 import './App.css';
-import Chat from './chat.js'
+
 import Login from './login.js'
 import { withAuth0 } from '@auth0/auth0-react';
 import React from 'react';
 
+const Chat = require('./chat.js');
 class App extends React.Component {
   constructor(props){
     super(props);
@@ -26,7 +27,7 @@ return (
       <body>
         {!this.props.auth0.isAuthenticated
         ? <Login />
-        : <Chat profile={this.user} setter={this.userSetter} />}
+        :Chat()}
       </body>
     </div>
   );
