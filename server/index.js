@@ -2,7 +2,7 @@
 
 const PORT = process.env.PORT || 3001;
 
-const io = require('socket.io')(3001);
+const io = require('socket.io')(3001, {cors: { origin: "*"}});
 
 const gifs = io.of('/gifs');
 
@@ -24,7 +24,7 @@ gifs.on('connection', socket => {
     socket.on('message', payload => {
 
         //push the message to all other clients
-        gifs.emit('message', payload)
+        gifs.broadcast.emit('message', payload)
     })
 
 })

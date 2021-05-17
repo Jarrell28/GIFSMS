@@ -6,27 +6,32 @@ require('dotenv').config();
 const HOST = process.env.REACT_APP_HOST || 'http://localhost:3001';
 const socket = io.connect(`${HOST}/gifs`);
  
-let Chat = () => {
+const Chat = () => {
 
     const [state, setState] = useState({message: '', user: 'admin'});
     const [chat, setChat] = useState([]);
 
     const onChang = (e) => {
-        setState({...state, message: e.target.value})
+        setState({...state, message: e})
+        console.log(state, chat)
     }
 
     useEffect(() => {
         socket.on('user joined', payload => {
-            console.log('JOINED')
+            console.log('JOINED', payload)
+            setChat(arr => [{message: 'JOINED', user: 'admin'}, ...arr ])
         })
         socket.on('message', payload => {
             console.log('messaged', payload)
-            setChat([{message: payload.message, user: payload.user}, ...chat, ])
+            let doug = chat
+            setChat([{message: payload.message, user: payload.user}, ...doug ])
+            console.log('chat: ', chat)
         })
     })
 
-    const chatWindow = () => {
-        return chat.map(({message, user}, index) => (
+    const ChatWindow = () => {
+
+        return  chat.map(({message, user}, index) => (
             <div key={index}>
                 <h2>
                     {user}: <img alt={index} src={message} />
@@ -35,18 +40,24 @@ let Chat = () => {
         ))
     }
 
+    const callMe = (e) => {
+        e.preventDefault();
+        socket.emit('message', state)
+        setChat([state, ...chat])
+    }
+
     return (
         <>
-        <input placeholder="what's you're moving mood?" onChange={(e) => onChang(e)} value={state.message}></input>
-        <button onClick={socket.emit('join', {name: "It'sa me" , room: "It'sa me" })}>state change?</button>
+        <input placeholder="what's you're moving mood?" onChange={(e) => onChang(e.target.value)} value={state.message}></input>
+        <button onClick={(e) => callMe(e)} >state change?</button>
 
         <h1>logs</h1>
-        {chatWindow()}
+        <ChatWindow/>
         </>
     )
 }
 
-module.exports = Chat;
+export default Chat;
 
 
 // class ChatWindow extends React.Component {
