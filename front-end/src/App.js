@@ -27,7 +27,7 @@ class App extends React.Component {
         <body>
           {!this.props.auth0.isAuthenticated
             ? <Login />
-            : <Chat user={this.props.auth0.user.email} />}
+            : <Chat user={this.props.auth0.user.nickname} />}
         </body>
       </div>
     );

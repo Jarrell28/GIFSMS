@@ -21,29 +21,40 @@ let Chat = (props) => {
         })
         socket.on('message', payload => {
             console.log('messaged', payload)
-            setChat([{ message: payload.message, user: payload.user }, ...chat,])
-        })
-    })
+            setChat(arr => [...arr, { message: payload.message, user: payload.user }])
+        });
+
+        setState({ ...state, user: props.user });
+
+        //Have user join main room after login
+    }, [])
 
     const chatWindow = () => {
         return chat.map(({ message, user }, index) => (
             <div key={index}>
                 <h2>
-                    {user}: <img alt={index} src={message} />
+                    {/* {user}: <img alt={index} src={message} /> */}
+                    {user}: <p>{message}</p>
                 </h2>
             </div>
         ))
     }
 
+    //Users should be able to create own public rooms or private rooms to specific users
     const joinRoom = () => {
-        socket.emit('join', { name: "It'sa me", room: "It'sa me" });
+        socket.emit('join', { name: state.user, room: "Custom room" });
         console.log(props.user);
+    }
+
+    const sendMessage = () => {
+        socket.emit('message', { message: state.message, user: state.user })
     }
 
     return (
         <>
-            <input placeholder="what's you're moving mood?" onChange={(e) => onChang(e)} value={state.message}></input>
-            <button onClick={joinRoom}>state change?</button>
+            <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
+            <button onClick={sendMessage}>Send Message</button>
+            <button onClick={joinRoom}>Join Main Room</button>
 
             <h1>logs</h1>
             {chatWindow()}

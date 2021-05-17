@@ -16,7 +16,7 @@ gifs.on('connection', socket => {
     //Function to have users create rooms
     socket.on('join', payload => {
         console.log('Room: ', payload.room)
-        console.log('User Joined: ', payload.user);
+        console.log('User Joined: ', payload.name);
 
         socket.to(payload.room).emit('user joined', payload); //This emits the message to clients
         socket.join(payload.room); // This creates the room
@@ -26,7 +26,7 @@ gifs.on('connection', socket => {
 
     //listen to new messages from clients
     socket.on('message', payload => {
-
+        console.log(payload);
         //push the message to all other clients
         gifs.emit('message', payload)
     })
