@@ -16,45 +16,73 @@ let Chat = (props) => {
     }
 
     useEffect(() => {
+        //Notifies when user joines room
         socket.on('user joined', payload => {
-            console.log('JOINED')
+            console.log(payload);
+            setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has joined the room`, user: payload.user }])
         })
+
+        //User has sent a message
         socket.on('message', payload => {
             console.log('messaged', payload)
+            //Updates the chat message list
             setChat(arr => [...arr, { message: payload.message, user: payload.user }])
         });
 
+        //Once User logs in, updates state for current user
         setState({ ...state, user: props.user });
 
+
+        //Notifies when user leaves a room
+        socket.on('user disconnected', payload => {
+            console.log(payload);
+            setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has left the room`, user: payload.user }])
+        })
+
+        //TODOS
         //Have user join main room after login
     }, [])
 
+    //Displays the chat messages
     const chatWindow = () => {
-        return chat.map(({ message, user }, index) => (
-            <div key={index}>
-                <h2>
-                    {/* {user}: <img alt={index} src={message} /> */}
-                    {user}: <p>{message}</p>
-                </h2>
-            </div>
+        return chat.map(({ message, user, type }, index) => (
+            type === 'notification' ?
+                <div key={index}>
+                    <h4>
+                        {message}
+                    </h4>
+                </div>
+                :
+                <div key={index}>
+                    <h2>
+                        {/* {user}: <img alt={index} src={message} /> */}
+                        {user}: {message}
+                    </h2>
+                </div>
         ))
     }
 
     //Users should be able to create own public rooms or private rooms to specific users
     const joinRoom = () => {
-        socket.emit('join', { name: state.user, room: "Custom room" });
-        console.log(props.user);
+        socket.emit('join', { user: state.user, room: "Custom room" });
+    }
+
+    const leaveRoom = () => {
+        socket.emit('leave', { user: state.user, room: "Custom room" });
     }
 
     const sendMessage = () => {
         socket.emit('message', { message: state.message, user: state.user })
     }
 
+    //Add method to fetch Giphy API on chat input
+
     return (
         <>
             <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
             <button onClick={sendMessage}>Send Message</button>
             <button onClick={joinRoom}>Join Main Room</button>
+            <button onClick={leaveRoom}>Leave Room</button>
 
             <h1>logs</h1>
             {chatWindow()}
@@ -62,7 +90,6 @@ let Chat = (props) => {
     )
 }
 
-// module.exports = Chat;
 export default Chat;
 
 // class ChatWindow extends React.Component {
