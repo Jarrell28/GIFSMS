@@ -2,7 +2,11 @@
 
 const PORT = process.env.PORT || 3001;
 
-const io = require('socket.io')(PORT);
+const io = require('socket.io')(PORT, {
+    cors: {
+        origin: "*",
+    }
+});
 
 const gifs = io.of('/gifs');
 

@@ -2,12 +2,12 @@
 import './App.css';
 
 import Login from './login.js'
+import Chat from './chat.js';
 import { withAuth0 } from '@auth0/auth0-react';
 import React from 'react';
 
-const Chat = require('./chat.js');
 class App extends React.Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       user: {}
@@ -15,24 +15,24 @@ class App extends React.Component {
   }
 
   userSetter(info) {
-    this.setState({user: {info}})
+    this.setState({ user: { info } })
   }
 
-render() {
-return (
-    <div className="App">
-      <header className="App-header">
-        {/* <img src={logo} className="App-logo" alt="logo" /> */}
-      </header>
-      <body>
-        {!this.props.auth0.isAuthenticated
-        ? <Login />
-        :Chat()}
-      </body>
-    </div>
-  );
-}
-  
+  render() {
+    return (
+      <div className="App">
+        <header className="App-header">
+          {/* <img src={logo} className="App-logo" alt="logo" /> */}
+        </header>
+        <body>
+          {!this.props.auth0.isAuthenticated
+            ? <Login />
+            : <Chat user={this.props.auth0.user.email} />}
+        </body>
+      </div>
+    );
+  }
+
 }
 
 export default withAuth0(App);

@@ -1,18 +1,18 @@
 
-import React, { useState , useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 
 const io = require('socket.io-client');
 require('dotenv').config();
 const HOST = process.env.REACT_APP_HOST || 'http://localhost:3001';
 const socket = io.connect(`${HOST}/gifs`);
- 
-let Chat = () => {
 
-    const [state, setState] = useState({message: '', user: 'admin'});
+let Chat = (props) => {
+
+    const [state, setState] = useState({ message: '', user: 'admin' });
     const [chat, setChat] = useState([]);
 
     const onChang = (e) => {
-        setState({...state, message: e.target.value})
+        setState({ ...state, message: e.target.value })
     }
 
     useEffect(() => {
@@ -21,12 +21,12 @@ let Chat = () => {
         })
         socket.on('message', payload => {
             console.log('messaged', payload)
-            setChat([{message: payload.message, user: payload.user}, ...chat, ])
+            setChat([{ message: payload.message, user: payload.user }, ...chat,])
         })
     })
 
     const chatWindow = () => {
-        return chat.map(({message, user}, index) => (
+        return chat.map(({ message, user }, index) => (
             <div key={index}>
                 <h2>
                     {user}: <img alt={index} src={message} />
@@ -35,19 +35,24 @@ let Chat = () => {
         ))
     }
 
+    const joinRoom = () => {
+        socket.emit('join', { name: "It'sa me", room: "It'sa me" });
+        console.log(props.user);
+    }
+
     return (
         <>
-        <input placeholder="what's you're moving mood?" onChange={(e) => onChang(e)} value={state.message}></input>
-        <button onClick={socket.emit('join', {name: "It'sa me" , room: "It'sa me" })}>state change?</button>
+            <input placeholder="what's you're moving mood?" onChange={(e) => onChang(e)} value={state.message}></input>
+            <button onClick={joinRoom}>state change?</button>
 
-        <h1>logs</h1>
-        {chatWindow()}
+            <h1>logs</h1>
+            {chatWindow()}
         </>
     )
 }
 
-module.exports = Chat;
-
+// module.exports = Chat;
+export default Chat;
 
 // class ChatWindow extends React.Component {
 //     constructor(props){
@@ -62,7 +67,7 @@ module.exports = Chat;
 //     componentDidMount(){
 //         console.log("MOUNTING")
 //         socket.emit('join', {name: "It'sa me" , room: "It'sa me" }).then(console.log('emitted'))
-     
+
 //     }
 
 //     submitGif(e){
