@@ -21,7 +21,7 @@ let Chat = () => {
         })
         socket.on('message', payload => {
             console.log('messaged', payload)
-            setChat([...chat, {message: payload.message, user: payload.user}])
+            setChat([{message: payload.message, user: payload.user}, ...chat, ])
         })
     })
 
