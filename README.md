@@ -1,4 +1,7 @@
-# GIFSMS
+# GIF MESSAGING SERVICE
+- A messaging service that uses only Gifs 
+
+
 ![jarpic](https://media-exp1.licdn.com/dms/image/C5603AQHGEeIrUVqSgQ/profile-displayphoto-shrink_200_200/0/1583288845201?e=1626307200&v=beta&t=XgeQvihKxTw3TATex2Qb9ZoSXC8-QfrX7k7Shu9qMwQ "jarrell")
 - Jarrell "[Jarrell28](https://github.com/Jarrell28)" Houston
 
@@ -10,6 +13,32 @@
 ![Tedpic](https://avatars.githubusercontent.com/u/76967842?v=4 "Ted pic")
 - Ted "[Ritzoosk](https://github.com/Ritzoosk)" Knecht
 
+
+## User Stories
+- As a user I would like to login using other account verification and not have to make a new login.
+- As a user I want to know who is in a particular chat room and know when new people arrive or leave.
+- As a user I want to select a Gif to send based on a simple search word I type in.
+- As a user I want to easily navigate between rooms/channels
+- As a user I want a "feeling lucky" button to randomly choose a Gif from the presented search options.
+
+
+## Feature Tasks
+- Oauth login and session tokens.
+- Chat rooms show when users are added or removed
+- Get Giphy API to display a selection of gifs based on a search query
+- Allow for multiple rooms (private?)
+- Random Gif selection button
+
+
+## Acceptance Tests
+- Ensure successful login via O-Auth.
+- Ensure users are informed other others entering and leaving rooms
+- Ensure sufficient amount of selections are presented to the user after search query.
+- Get multiple rooms running and working, allowing users to move between them.
+- Ensure a "feeling lucky" allows for a randow automatic selection and reply of a Gif.
+
+# DOM Model
+![Domm](./assets/dom.PNG)
 
 # TEAM AGREEMENT
 
