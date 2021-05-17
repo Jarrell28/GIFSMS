@@ -6,10 +6,11 @@ require('dotenv').config();
 const HOST = process.env.REACT_APP_HOST || 'http://localhost:3001';
 const socket = io.connect(`${HOST}/gifs`);
 
-let Chat = (props) => {
+let Chat = ({ user }) => {
 
     const [state, setState] = useState({ message: '', user: 'admin' });
     const [chat, setChat] = useState([]);
+    const [participants, setParticipants] = useState([]);
 
     const onChang = (e) => {
         setState({ ...state, message: e.target.value })
@@ -18,20 +19,20 @@ let Chat = (props) => {
     useEffect(() => {
         //Notifies when user joines room
         socket.on('user joined', payload => {
-            console.log(payload);
-            setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has joined the room`, user: payload.user }])
+            //Sets chat notification of user joining room
+            setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has joined the room`, user: payload.user }]);
+        });
+
+        socket.on('get participants', payload => {
+            //Receives list of participants from socket server
+            setParticipants(payload.participants)
         })
 
         //User has sent a message
         socket.on('message', payload => {
-            console.log('messaged', payload)
             //Updates the chat message list
             setChat(arr => [...arr, { message: payload.message, user: payload.user }])
         });
-
-        //Once User logs in, updates state for current user
-        setState({ ...state, user: props.user });
-
 
         //Notifies when user leaves a room
         socket.on('user disconnected', payload => {
@@ -41,6 +42,11 @@ let Chat = (props) => {
 
         //TODOS
         //Have user join main room after login
+
+        //Once User logs in, updates state for current user
+        setState({ ...state, user })
+
+        // socket.emit('join', { user: state.user, room: "Main Room" })
     }, [])
 
     //Displays the chat messages
@@ -59,6 +65,17 @@ let Chat = (props) => {
                         {user}: {message}
                     </h2>
                 </div>
+        ))
+    }
+
+    //Displays the participants
+    const chatParticipants = () => {
+        return participants.map((user, index) => (
+            <div key={index}>
+                <h3>
+                    {user}
+                </h3>
+            </div>
         ))
     }
 
@@ -86,67 +103,16 @@ let Chat = (props) => {
 
             <h1>logs</h1>
             {chatWindow()}
+
+            {participants && (
+                <>
+                    <h2>Chat Participants</h2>
+                    {chatParticipants()}
+                </>
+            )}
+
         </>
     )
 }
 
 export default Chat;
-
-// class ChatWindow extends React.Component {
-//     constructor(props){
-//         super(props);
-//         this.socket = socket
-//         this.state = {
-//             gifSearch: '',
-//             searchArray:[]
-//         }
-//     }
-
-//     componentDidMount(){
-//         console.log("MOUNTING")
-//         socket.emit('join', {name: "It'sa me" , room: "It'sa me" }).then(console.log('emitted'))
-
-//     }
-
-//     submitGif(e){
-//         e.preventDefault();
-//         const {message , user } = state
-//         socket.emit('message', {message, user: user })
-//         this.setState({message: '', user: 'admin'})
-//     }
-
-
-// render(){
-//        socket.on('user joined', payload => {
-//             this.props.setter(payload.user)
-
-//             console.log("User Joined Room: ", payload.user); //Sends notification of user name that join
-//         })
-//         socket.on('message', payload => {
-//             console.log(payload);
-//         });
-//     return (
-//         <>
-//         <div>
-//             {this.state.searchArray.length>0
-//             ? this.state.searchArray.forEach(el =>{
-//                 return (
-//                 <div>
-//                     <img src={el.src} alt={el.alt} />
-//                     <p>{el.username}</p>
-//                 </div>
-//             )
-//             })
-//             : <></>}
-//         </div>
-//         <input placeholder="what's you're moving mood?" onChange={(e) => this.setState({gifSearch: e.target.value})}></input>
-//         <button onClick={e => submitGif(e)}>state change?</button>
-//         </>
-//     )
-// }
-
-
-// }
-
-
-// export default ChatWindow
