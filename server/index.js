@@ -2,7 +2,11 @@
 
 const PORT = process.env.PORT || 3001;
 
-const io = require('socket.io')(3001, {cors: { origin: "*"}});
+const io = require('socket.io')(PORT, {
+    cors: {
+        origin: "*",
+    }
+});
 
 const gifs = io.of('/gifs');
 
@@ -12,19 +16,19 @@ gifs.on('connection', socket => {
     //Function to have users create rooms
     socket.on('join', payload => {
         console.log('Room: ', payload.room)
-        console.log('User Joined: ', payload.user);
-
-        socket.to(payload.room).emit('user joined', payload); //This emits the message to clients
+        console.log('User Joined: ', payload.name);
         socket.join(payload.room); // This creates the room
+        socket.to(payload.room).emit('user joined', payload); //This emits the message to clients
+        
     })
 
     //Function to have DMs
 
     //listen to new messages from clients
     socket.on('message', payload => {
-
+        console.log(payload);
         //push the message to all other clients
-        gifs.broadcast.emit('message', payload)
+        gifs.emit('message', payload)
     })
 
 })
