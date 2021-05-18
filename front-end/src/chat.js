@@ -11,6 +11,8 @@ let Chat = ({user}) => {
     const [chat, setChat] = useState([]);
     const [gifArray, setGifArray] = useState([]);
     const [participants, setParticipants] = useState([]);
+    const [rooms, setRooms] = useState([]);
+    const [newRoom, setNewRoom] = useState('');
 
     const onChang = (e) => {
         setState({ ...state, message: e.target.value })
@@ -26,6 +28,11 @@ let Chat = ({user}) => {
         socket.on('get participants', payload => {
             //Receives list of participants from socket server
             setParticipants(payload.participants)
+        })
+
+         //Receives list of rooms
+         socket.on('get rooms', payload => {
+            setRooms(payload.rooms);
         })
 
         //User has sent a message
@@ -48,6 +55,14 @@ let Chat = ({user}) => {
 
         // eslint-disable-next-line
     }, [])
+
+     //Have user join main room after login
+     useEffect(() => {
+        if (state.user) {
+            socket.emit('join', { user: state.user, room: "Custom room" })
+        }
+    }, [state.user])
+
  // method to fetch Giphy API on chat input
     const Data = {set:[]};
     // `https://api.giphy.com/v1/gifs/search?api_key=${process.env.REACT_APP_GIF_API}&q=${state.message}&limit=5`;
@@ -64,9 +79,9 @@ let Chat = ({user}) => {
                 console.log("FOREACH LOOP: ", el.images.downsized_medium )
 
                 Data.set.push(el.images.downsized_medium.url)
-                console.log(Data.set[0])
             })
             setGifArray(arr => [...Data.set])
+            Data.set = []
             // console.log("does the state have movement?: ", gifArray)
           })
           .catch(function (error) {
@@ -75,15 +90,23 @@ let Chat = ({user}) => {
           })
       }
 
+      const clickMe = (e) => {
+          e.preventDefault();
+          console.log(e.target)
+           setState({...state, message: `${e.target.src}`})
+           sendMessage()
+      }
+
       const gifWindow = (data) => {
           console.log('Gif Window: ', data)
           return data.map( el => (
               
             <div>
-                <img src={el} />
+                <img src={el} onClick={(e) => clickMe(e)}/>
             </div>
           ))
       }
+
 
     //Displays the chat messages
     const chatWindow = () => {
@@ -115,9 +138,20 @@ let Chat = ({user}) => {
         ))
     }
 
+     //Displays the chat rooms
+     const chatRooms = () => {
+        return rooms.map((room, index) => (
+            <div key={index}>
+                <h3>
+                    {room}
+                </h3>
+            </div>
+        ))
+    }
+
     //Users should be able to create own public rooms or private rooms to specific users
     const joinRoom = () => {
-        socket.emit('join', { user: state.user, room: "Custom room" });
+        socket.emit('join', { user: state.user, room: newRoom });
     }
 
     const leaveRoom = () => {
@@ -132,26 +166,49 @@ let Chat = ({user}) => {
 
     return (
         <>
-            <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
-            <h2>GIFF</h2>
-            <div>
+             <div className="chat-container">
+                <div className="rooms">
+                    <h2>Chat Rooms</h2>
+                    {
+                        rooms && (
+                            <>
+                                {chatRooms()}
+                            </>
+                        )
+                    }
+                </div>
+                <div className='gifTown'>
                 <img alt='test' src="https://media2.giphy.com/media/QvMlVkJ3XSSj9cOxDM/giphy.gif?cid=790b76113875c05435de25182206c660c3d1f126046a1065&rid=giphy.gif&ct=g" />
                    { gifWindow(gifArray)}
+                </div>
+                <div className="chat">
+                    <h2>Chat</h2>
+                    {chatWindow()}
+                    <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
+                    <button onClick={sendMessage}>Send Message</button>
+                </div>
+                <div className="participants">
+                    <h2>Chat Participants</h2>
+                    {
+                        participants && (
+                            <>
+                                {chatParticipants()}
+                            </>
+                        )
+                    }
+                </div>
+
             </div>
+
+
             <button onClick={Data.handleAPICall}>Giph Me</button>
-            <button onClick={sendMessage}>Send Message</button>
-            <button onClick={joinRoom}>Join Main Room</button>
+            {/* <button onClick={joinRoom}>Join Main Room</button> */}
             <button onClick={leaveRoom}>Leave Room</button>
 
-            <h1>logs</h1>
-            {chatWindow()}
-            {participants && (
-                <>
-                    <h2>Chat Participants</h2>
-                    {chatParticipants()}
-                </>
-            )}
+            <input type="text" placeholder="Enter Room Name" onChange={e => setNewRoom(e.target.value)} />
+            <button onClick={joinRoom}>Create Room</button>
         </>
+
     )
 }
 
@@ -162,3 +219,31 @@ export default Chat;
 //click to send
 // message constructor
 
+
+
+
+
+
+
+
+
+        //     <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
+        //     <h2>GIFF</h2>
+        //     <div>
+        //         <img alt='test' src="https://media2.giphy.com/media/QvMlVkJ3XSSj9cOxDM/giphy.gif?cid=790b76113875c05435de25182206c660c3d1f126046a1065&rid=giphy.gif&ct=g" />
+        //            { gifWindow(gifArray)}
+        //     </div>
+        //     <button onClick={Data.handleAPICall}>Giph Me</button>
+        //     <button onClick={sendMessage}>Send Message</button>
+        //     <button onClick={joinRoom}>Join Main Room</button>
+        //     <button onClick={leaveRoom}>Leave Room</button>
+
+        //     <h1>logs</h1>
+        //     {chatWindow()}
+        //     {participants && (
+        //         <>
+        //             <h2>Chat Participants</h2>
+        //             {chatParticipants()}
+        //         </>
+        //     )}
+        // </>
