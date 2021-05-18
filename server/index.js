@@ -39,6 +39,11 @@ gifs.on('connection', socket => {
         //Sends participants to all clients in specific room
         let participants = gifsRooms[payload.room];
         gifs.in(payload.room).emit('get participants', { participants })
+
+        //Get List of rooms and send to all clients
+        let rooms = Object.keys(gifsRooms);
+        console.log(Object.keys(gifsRooms));
+        gifs.in(payload.room).emit('get rooms', { rooms });
     });
 
 
