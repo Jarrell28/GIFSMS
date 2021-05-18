@@ -131,6 +131,7 @@ let Chat = ({user}) => {
             <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
             <h2>GIFF</h2>
             {gifWindow(Data.set)}
+            <img src='https://media1.giphy.com/media/DhstvI3zZ598Nb1rFf/giphy-downsized-small.mp4?cid=0c15cd776wawl8s0xxgfmpqcc6ippmc50gdhkd3cqt3taui8&rid=giphy-downsized-small.mp4&ct=g' alt='test' />
             <button onClick={Data.handleAPICall}>Giph Me</button>
             <button onClick={sendMessage}>Send Message</button>
             <button onClick={joinRoom}>Join Main Room</button>
