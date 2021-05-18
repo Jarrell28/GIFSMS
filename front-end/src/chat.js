@@ -46,6 +46,7 @@ let Chat = ({user}) => {
             setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has left the room`, user: payload.user }])
         })
 
+
         // eslint-disable-next-line
     }, [])
  // method to fetch Giphy API on chat input
@@ -59,11 +60,12 @@ let Chat = ({user}) => {
           .then(function (superagentResults) {
               Data.results = superagentResults
               let workable = Data.results.body.data
+              console.log("WORKING API ------: ")
             workable.forEach(el => {
                 console.log("FOREACH LOOP: ", el.images.downsized_small )
 
                 Data.set.push(el.images.downsized_small.mp4)
-                console.log(Data.set)
+                console.log(Data.set, workable)
             })
             // console.log("does the state have movement?: ", gifArray)
           })
@@ -131,7 +133,7 @@ let Chat = ({user}) => {
             <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
             <h2>GIFF</h2>
             {gifWindow(Data.set)}
-            <img src='https://media1.giphy.com/media/DhstvI3zZ598Nb1rFf/giphy-downsized-small.mp4?cid=0c15cd776wawl8s0xxgfmpqcc6ippmc50gdhkd3cqt3taui8&rid=giphy-downsized-small.mp4&ct=g' alt='test' />
+
             <button onClick={Data.handleAPICall}>Giph Me</button>
             <button onClick={sendMessage}>Send Message</button>
             <button onClick={joinRoom}>Join Main Room</button>
