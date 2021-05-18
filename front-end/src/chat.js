@@ -7,7 +7,7 @@ const socket = io.connect(`${HOST}/gifs`);
 
 let Chat = ({user}) => {
 
-    const [state, setState] = useState({ message: '', user: 'admin' });
+    const [state, setState] = useState({ message: '', user: '' });
     const [chat, setChat] = useState([]);
     const [gifArray, setGifArray] = useState([]);
     const [participants, setParticipants] = useState([]);
@@ -92,9 +92,9 @@ let Chat = ({user}) => {
 
       const clickMe = (e) => {
           e.preventDefault();
-          console.log(e.target)
+          console.log(e.target.src)
            setState({...state, message: `${e.target.src}`})
-           sendMessage()
+           socket.emit('message', { message: e.target.src, user: state.user })
       }
 
       const gifWindow = (data) => {
@@ -120,8 +120,8 @@ let Chat = ({user}) => {
                 :
                 <div key={index}>
                     <h2>
-                        {/* {user}: <img alt={index} src={message} /> */}
-                        {user}: {message}
+                        {user}: <img alt={index} src={message} />
+                        {/* {user}: {message} */}
                     </h2>
                 </div>
         ))
