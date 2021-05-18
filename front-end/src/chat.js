@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 const superagent = require('superagent');
 const io = require('socket.io-client');
 require('dotenv').config();
-const HOST =  'http://localhost:3001';
-// process.env.REACT_APP_HOST ||
+const HOST = process.env.REACT_APP_HOST || 'http://localhost:3001';
 const socket = io.connect(`${HOST}/gifs`);
 
 let Chat = ({user}) => {
 
     const [state, setState] = useState({ message: '', user: 'admin' });
     const [chat, setChat] = useState([]);
-    // const [gifArray, setGifArray] = useState([]);
+    const [gifArray, setGifArray] = useState([]);
     const [participants, setParticipants] = useState([]);
 
     const onChang = (e) => {
@@ -60,13 +59,14 @@ let Chat = ({user}) => {
           .then(function (superagentResults) {
               Data.results = superagentResults
               let workable = Data.results.body.data
-              console.log("WORKING API ------: ")
+              console.log("WORKING API ------: ", Data.results.body.data)
             workable.forEach(el => {
-                console.log("FOREACH LOOP: ", el.images.downsized_small )
+                console.log("FOREACH LOOP: ", el.images.downsized_medium )
 
-                Data.set.push(el.images.downsized_small.mp4)
-                console.log(Data.set, workable)
+                Data.set.push(el.images.downsized_medium.url)
+                console.log(Data.set[0])
             })
+            setGifArray(arr => [...Data.set])
             // console.log("does the state have movement?: ", gifArray)
           })
           .catch(function (error) {
@@ -76,9 +76,11 @@ let Chat = ({user}) => {
       }
 
       const gifWindow = (data) => {
-          return data.map( (el, index) => (
+          console.log('Gif Window: ', data)
+          return data.map( el => (
+              
             <div>
-                <img src={el} key={index} alt={index} />
+                <img src={el} />
             </div>
           ))
       }
@@ -132,8 +134,10 @@ let Chat = ({user}) => {
         <>
             <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
             <h2>GIFF</h2>
-            {gifWindow(Data.set)}
-
+            <div>
+                <img alt='test' src="https://media2.giphy.com/media/QvMlVkJ3XSSj9cOxDM/giphy.gif?cid=790b76113875c05435de25182206c660c3d1f126046a1065&rid=giphy.gif&ct=g" />
+                   { gifWindow(gifArray)}
+            </div>
             <button onClick={Data.handleAPICall}>Giph Me</button>
             <button onClick={sendMessage}>Send Message</button>
             <button onClick={joinRoom}>Join Main Room</button>
@@ -152,3 +156,9 @@ let Chat = ({user}) => {
 }
 
 export default Chat;
+
+//display images
+// dropdown results of gif search
+//click to send
+// message constructor
+
