@@ -42,7 +42,6 @@ gifs.on('connection', socket => {
 
         //Get List of rooms and send to all clients
         let rooms = Object.keys(gifsRooms);
-        console.log(Object.keys(gifsRooms));
         gifs.in(payload.room).emit('get rooms', { rooms });
     });
 
@@ -51,14 +50,12 @@ gifs.on('connection', socket => {
 
     //listen to new messages from clients
     socket.on('message', payload => {
-        console.log(payload);
         //push the message to all other clients
         gifs.emit('message', payload)
     })
 
     //Handles users leaving rooms
     socket.on('leave', payload => {
-        console.log(payload);
 
         //Removes leaving user from room array
         gifsRooms[payload.room] = gifsRooms[payload.room].filter(user => user !== payload.user);
@@ -70,6 +67,12 @@ gifs.on('connection', socket => {
         //Emits user left room notification to clients in specific room
         socket.to(payload.room).emit('user disconnected', payload);
 
+
+        //When a user leaves a room, see if room is empty and delete room
+        if (gifsRooms[payload.room].length === 0) {
+            delete gifsRooms[payload.room];
+        }
+
         //Handles removal of user from froom
         socket.leave(payload.room);
     })
@@ -80,5 +83,13 @@ gifs.on('connection', socket => {
 
 })
 
+
+//TODOS
+
+//Have Indication of which room you are in
+
+//Be able to click a room and join
+
+//Be able to click a users name and create a Private room
 
 

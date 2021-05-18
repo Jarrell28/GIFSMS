@@ -60,7 +60,7 @@ let Chat = ({ user }) => {
     //Have user join main room after login
     useEffect(() => {
         if (state.user) {
-            socket.emit('join', { user: state.user, room: "Main Room" })
+            socket.emit('join', { user: state.user, room: "Custom room" })
         }
     }, [state.user])
 
