@@ -6,11 +6,12 @@ const HOST =  'http://localhost:3001';
 // process.env.REACT_APP_HOST ||
 const socket = io.connect(`${HOST}/gifs`);
 
-let Chat = (props) => {
+let Chat = ({user}) => {
 
     const [state, setState] = useState({ message: '', user: 'admin' });
     const [chat, setChat] = useState([]);
-    const [gifArray, setGifArray] = useState([]);
+    // const [gifArray, setGifArray] = useState([]);
+    const [participants, setParticipants] = useState([]);
 
     const onChang = (e) => {
         setState({ ...state, message: e.target.value })
@@ -23,15 +24,20 @@ let Chat = (props) => {
             setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has joined the room`, user: payload.user }])
         })
 
+        socket.on('get participants', payload => {
+            //Receives list of participants from socket server
+            setParticipants(payload.participants)
+        })
+
         //User has sent a message
         socket.on('message', payload => {
             console.log('messaged', payload)
             //Updates the chat message list
             setChat(arr => [...arr, { message: payload.message, user: payload.user }])
         });
-
+        
         //Once User logs in, updates state for current user
-        setState({ ...state, user: props.user });
+        setState({ ...state, user });
 
 
         //Notifies when user leaves a room
@@ -40,10 +46,9 @@ let Chat = (props) => {
             setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has left the room`, user: payload.user }])
         })
 
-        //TODOS
-        //Have user join main room after login
+        // eslint-disable-next-line
     }, [])
-
+ // method to fetch Giphy API on chat input
     const Data = {set:[]};
     // `https://api.giphy.com/v1/gifs/search?api_key=${process.env.REACT_APP_GIF_API}&q=${state.message}&limit=5`;
     Data.handleAPICall = async (req, res) => {
@@ -68,6 +73,14 @@ let Chat = (props) => {
           })
       }
 
+      const gifWindow = (data) => {
+          return data.map( (el, index) => (
+            <div>
+                <img src={el} key={index} alt={index} />
+            </div>
+          ))
+      }
+
     //Displays the chat messages
     const chatWindow = () => {
         return chat.map(({ message, user, type }, index) => (
@@ -87,6 +100,17 @@ let Chat = (props) => {
         ))
     }
 
+    //Displays the participants
+    const chatParticipants = () => {
+        return participants.map((user, index) => (
+            <div key={index}>
+                <h3>
+                    {user}
+                </h3>
+            </div>
+        ))
+    }
+
     //Users should be able to create own public rooms or private rooms to specific users
     const joinRoom = () => {
         socket.emit('join', { user: state.user, room: "Custom room" });
@@ -100,11 +124,13 @@ let Chat = (props) => {
         socket.emit('message', { message: state.message, user: state.user })
     }
 
-    //Add method to fetch Giphy API on chat input
+   
 
     return (
         <>
             <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
+            <h2>GIFF</h2>
+            {gifWindow(Data.set)}
             <button onClick={Data.handleAPICall}>Giph Me</button>
             <button onClick={sendMessage}>Send Message</button>
             <button onClick={joinRoom}>Join Main Room</button>
@@ -112,6 +138,12 @@ let Chat = (props) => {
 
             <h1>logs</h1>
             {chatWindow()}
+            {participants && (
+                <>
+                    <h2>Chat Participants</h2>
+                    {chatParticipants()}
+                </>
+            )}
         </>
     )
 }

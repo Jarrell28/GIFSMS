@@ -11,16 +11,33 @@ const io = require('socket.io')(PORT, {
 const gifs = io.of('/gifs');
 
 gifs.on('connection', socket => {
-    // console.log('User Joined Chat:' + socket.id);
 
+   //Holds participants in each room
+    const gifsRooms = {};
     //Function to have users create rooms
     socket.on('join', payload => {
+        //Initiates list of participants in specific rooms
+        //If the room exists, push the joining user in the room array
+        if (payload.room in gifsRooms) {
+            gifsRooms[payload.room].push(payload.user);
+        } else {
+            //The room does not exist, create a new room array and add the user
+            gifsRooms[payload.room] = [payload.user];
+        }
+
         console.log('Room: ', payload.room)
         console.log('User Joined: ', payload.user);
 
-        socket.to(payload.room).emit('user joined', payload); //This emits the message to clients
-        socket.join(payload.room); // This creates the room
-    })
+        //Emits user joined room to clients
+        socket.to(payload.room).emit('user joined', payload);
+
+        //Joins the user to the room
+        socket.join(payload.room);
+
+        //Sends participants to all clients in specific room
+        let participants = gifsRooms[payload.room];
+        gifs.in(payload.room).emit('get participants', { participants })
+    });
 
     //Function to have DMs
 
@@ -31,15 +48,26 @@ gifs.on('connection', socket => {
         gifs.emit('message', payload)
     })
 
-    //Disconnect
-    socket.on('leave', payload => {
-        console.log(payload);
-        socket.leave(payload.room);
-        socket.to(payload.room).emit('user disconnected', payload);
-    })
+   //Handles users leaving rooms
+   socket.on('leave', payload => {
+    console.log(payload);
 
-    socket.on('disconnect', reason => {
-        console.log(reason);
-    })
+    //Removes leaving user from room array
+    gifsRooms[payload.room] = gifsRooms[payload.room].filter(user => user !== payload.user);
+
+    //Sends participants to all clients in specific room
+    let participants = gifsRooms[payload.room];
+    gifs.in(payload.room).emit('get participants', { participants })
+
+    //Emits user left room notification to clients in specific room
+    socket.to(payload.room).emit('user disconnected', payload);
+
+    //Handles removal of user from froom
+    socket.leave(payload.room);
+})
+
+// socket.on('disconnect', reason => {
+//     console.log(reason);
+// })
 
 })
