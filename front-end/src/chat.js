@@ -16,6 +16,7 @@ let Chat = ({ user }) => {
     const [rooms, setRooms] = useState([]);
     const [newRoom, setNewRoom] = useState('');
     const [gifArray, setGifArray] = useState([]);
+    const [activeRoom, setActiveRoom] = useState('Main Room');
 
     const onChang = (e) => {
         setState({ ...state, message: e.target.value })
@@ -24,8 +25,9 @@ let Chat = ({ user }) => {
     useEffect(() => {
         //Notifies when user joines room
         socket.on('user joined', payload => {
+            console.log(payload);
             //Sets chat notification of user joining room
-            setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has joined the room`, user: payload.user }]);
+            setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has joined the room`, user: payload.user }])
         });
 
         //Receives list of participants from socket server
@@ -50,19 +52,16 @@ let Chat = ({ user }) => {
 
         //Notifies when user leaves a room
         socket.on('user disconnected', payload => {
-            console.log(payload);
             setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has left the room`, user: payload.user }])
         })
-
-
     }, [])
 
     //Have user join main room after login
     useEffect(() => {
         if (state.user) {
-            socket.emit('join', { user: state.user, room: "Custom room" })
+            socket.emit('join', { user: state.user, room: activeRoom })
         }
-    }, [state.user])
+    }, [state.user]);
 
     const Data = { set: [] };
     // `https://api.giphy.com/v1/gifs/search?api_key=${process.env.REACT_APP_GIF_API}&q=${state.message}&limit=5`;
@@ -90,6 +89,7 @@ let Chat = ({ user }) => {
 
     //Displays the chat messages
     const chatWindow = () => {
+
         return chat.map(({ message, user, type }, index) => (
             type === 'notification' ?
                 <div key={index}>
@@ -121,25 +121,38 @@ let Chat = ({ user }) => {
     //Displays the chat rooms
     const chatRooms = () => {
         return rooms.map((room, index) => (
-            <div key={index}>
-                <h3>
-                    {room}
+            <div key={index} onClick={switchRoom}>
+                <h3 room={room}>
+                    {room} {room === activeRoom ? " - active" : ""}
                 </h3>
             </div>
         ))
     }
 
+    const switchRoom = (e) => {
+        let selectedRoom = e.target.getAttribute('room');
+        if (activeRoom !== selectedRoom) {
+            socket.emit('leave', { user: state.user, room: activeRoom });
+            setChat([]);
+            socket.emit('join', { user: state.user, room: selectedRoom });
+            setActiveRoom(selectedRoom);
+        }
+    }
+
     //Users should be able to create own public rooms or private rooms to specific users
     const joinRoom = () => {
+        setChat([]);
         socket.emit('join', { user: state.user, room: newRoom });
+        setActiveRoom(newRoom);
     }
 
     const leaveRoom = () => {
-        socket.emit('leave', { user: state.user, room: "Custom room" });
+        socket.emit('leave', { user: state.user, room: activeRoom });
+        setActiveRoom('');
     }
 
     const sendMessage = () => {
-        socket.emit('message', { message: state.message, user: state.user })
+        socket.emit('message', { message: state.message, user: state.user, room: activeRoom })
     }
 
     //Add method to fetch Giphy API on chat input

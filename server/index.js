@@ -21,7 +21,10 @@ gifs.on('connection', socket => {
         //Initiates list of participants in specific rooms
         //If the room exists, push the joining user in the room array
         if (payload.room in gifsRooms) {
-            gifsRooms[payload.room].push(payload.user);
+            //Checks for duplicate names in rooms
+            if (!gifsRooms[payload.room].includes(payload.user)) {
+                gifsRooms[payload.room].push(payload.user);
+            }
         } else {
             //The room does not exist, create a new room array and add the user
             gifsRooms[payload.room] = [payload.user];
@@ -30,11 +33,11 @@ gifs.on('connection', socket => {
         console.log('Room: ', payload.room)
         console.log('User Joined: ', payload.user);
 
-        //Emits user joined room to clients
-        socket.to(payload.room).emit('user joined', payload);
-
         //Joins the user to the room
         socket.join(payload.room);
+
+        //Emits user joined room to clients
+        gifs.in(payload.room).emit('user joined', payload);
 
         //Sends participants to all clients in specific room
         let participants = gifsRooms[payload.room];
@@ -42,16 +45,15 @@ gifs.on('connection', socket => {
 
         //Get List of rooms and send to all clients
         let rooms = Object.keys(gifsRooms);
-        gifs.in(payload.room).emit('get rooms', { rooms });
+        gifs.emit('get rooms', { rooms });
     });
 
-
-    //Function to have DMs
 
     //listen to new messages from clients
     socket.on('message', payload => {
         //push the message to all other clients
-        gifs.emit('message', payload)
+        gifs.in(payload.room).emit('message', payload);
+        console.log(payload);
     })
 
     //Handles users leaving rooms
@@ -73,23 +75,7 @@ gifs.on('connection', socket => {
             delete gifsRooms[payload.room];
         }
 
-        //Handles removal of user from froom
+        //Handles removal of user from from
         socket.leave(payload.room);
     })
-
-    // socket.on('disconnect', reason => {
-    //     console.log(reason);
-    // })
-
 })
-
-
-//TODOS
-
-//Have Indication of which room you are in
-
-//Be able to click a room and join
-
-//Be able to click a users name and create a Private room
-
-
