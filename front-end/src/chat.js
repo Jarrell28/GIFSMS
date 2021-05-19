@@ -1,3 +1,4 @@
+import './App.css';
 import React, { useState, useEffect } from 'react';
 const superagent = require('superagent');
 const io = require('socket.io-client');
@@ -93,7 +94,7 @@ let Chat = ({user}) => {
       const clickMe = (e) => {
           e.preventDefault();
           console.log(e.target.src)
-           setState({...state, message: `${e.target.src}`})
+        //    setState({...state, message: `${e.target.src}`})
            socket.emit('message', { message: e.target.src, user: state.user })
       }
 
@@ -121,7 +122,6 @@ let Chat = ({user}) => {
                 <div key={index}>
                     <h2>
                         {user}: <img alt={index} src={message} />
-                        {/* {user}: {message} */}
                     </h2>
                 </div>
         ))
@@ -155,7 +155,7 @@ let Chat = ({user}) => {
     }
 
     const leaveRoom = () => {
-        socket.emit('leave', { user: state.user, room: "Custom room" });
+        socket.emit('leave', { user: state.user, room: newRoom});
     }
 
     const sendMessage = () => {
@@ -183,7 +183,9 @@ let Chat = ({user}) => {
                 </div>
                 <div className="chat">
                     <h2>Chat</h2>
+                    <div className="chatArea">
                     {chatWindow()}
+                    </div>
                     <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
                     <button onClick={sendMessage}>Send Message</button>
                 </div>
@@ -214,9 +216,7 @@ let Chat = ({user}) => {
 
 export default Chat;
 
-//display images
 // dropdown results of gif search
-//click to send
 // message constructor
 
 
@@ -224,26 +224,3 @@ export default Chat;
 
 
 
-
-
-
-        //     <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
-        //     <h2>GIFF</h2>
-        //     <div>
-        //         <img alt='test' src="https://media2.giphy.com/media/QvMlVkJ3XSSj9cOxDM/giphy.gif?cid=790b76113875c05435de25182206c660c3d1f126046a1065&rid=giphy.gif&ct=g" />
-        //            { gifWindow(gifArray)}
-        //     </div>
-        //     <button onClick={Data.handleAPICall}>Giph Me</button>
-        //     <button onClick={sendMessage}>Send Message</button>
-        //     <button onClick={joinRoom}>Join Main Room</button>
-        //     <button onClick={leaveRoom}>Leave Room</button>
-
-        //     <h1>logs</h1>
-        //     {chatWindow()}
-        //     {participants && (
-        //         <>
-        //             <h2>Chat Participants</h2>
-        //             {chatParticipants()}
-        //         </>
-        //     )}
-        // </>

@@ -10,13 +10,24 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
 }
 
 .login-box {
   background-color: white;
   display: block;
   justify-content: center;
+}
+
+.chatArea{
+  width:60ch;
+  justify-self: center;
+  background-color: blueviolet;
+}
+
+.gifTown{
+  display: flex;
+  border: 1px solid green;
+  
 }
 
 
