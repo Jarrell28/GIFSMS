@@ -14,6 +14,7 @@ let Chat = ({user}) => {
     const [participants, setParticipants] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [newRoom, setNewRoom] = useState('');
+    const [activeRoom, setActiveRoom] = useState('Main Room');
 
     const onChang = (e) => {
         setState({ ...state, message: e.target.value })
@@ -77,9 +78,9 @@ let Chat = ({user}) => {
               let workable = Data.results.body.data
               console.log("WORKING API ------: ", Data.results.body.data)
             workable.forEach(el => {
-                console.log("FOREACH LOOP: ", el.images.downsized_medium )
+                console.log("FOREACH LOOP: ", el.images )
 
-                Data.set.push(el.images.downsized_medium.url)
+                Data.set.push(el.images.fixed_height.webp)
             })
             setGifArray(arr => [...Data.set])
             Data.set = []
@@ -102,8 +103,8 @@ let Chat = ({user}) => {
           console.log('Gif Window: ', data)
           return data.map( el => (
               
-            <div>
-                <img src={el} onClick={(e) => clickMe(e)}/>
+            <div className="gif-prev">
+                <img src={el} alt={el} onClick={(e) => clickMe(e)}/>
             </div>
           ))
       }
@@ -149,24 +150,40 @@ let Chat = ({user}) => {
         ))
     }
 
+    
+    const switchRoom = (e) => {
+        let selectedRoom = e.target.getAttribute('room');
+        if (activeRoom !== selectedRoom) {
+            socket.emit('leave', { user: state.user, room: activeRoom });
+            setChat([]);
+            socket.emit('join', { user: state.user, room: selectedRoom });
+            setActiveRoom(selectedRoom);
+        }
+    }
+
     //Users should be able to create own public rooms or private rooms to specific users
     const joinRoom = () => {
+        setChat([]);
         socket.emit('join', { user: state.user, room: newRoom });
+        setActiveRoom(newRoom);
+
     }
 
     const leaveRoom = () => {
-        socket.emit('leave', { user: state.user, room: newRoom});
+        socket.emit('leave', { user: state.user, room: activeRoom });
+        setActiveRoom('');
     }
 
-    const sendMessage = () => {
-        socket.emit('message', { message: state.message, user: state.user })
-    }
+    // const sendMessage = () => {
+    //     socket.emit('message', { message: state.message, user: state.user })
+    // }
 
    
 
     return (
         <>
              <div className="chat-container">
+                 <div className='sidebar'>
                 <div className="rooms">
                     <h2>Chat Rooms</h2>
                     {
@@ -176,19 +193,11 @@ let Chat = ({user}) => {
                             </>
                         )
                     }
-                </div>
-                <div className='gifTown'>
-                <img alt='test' src="https://media2.giphy.com/media/QvMlVkJ3XSSj9cOxDM/giphy.gif?cid=790b76113875c05435de25182206c660c3d1f126046a1065&rid=giphy.gif&ct=g" />
-                   { gifWindow(gifArray)}
-                </div>
-                <div className="chat">
-                    <h2>Chat</h2>
-                    <div className="chatArea">
-                    {chatWindow()}
-                    </div>
-                    <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
-                    <button onClick={sendMessage}>Send Message</button>
-                </div>
+                <input type="text" placeholder="Enter Room Name" onChange={e => setNewRoom(e.target.value)} />
+                <button onClick={joinRoom}>Create Room</button>
+                <button onClick={leaveRoom}>Leave Room</button>
+
+                </div> 
                 <div className="participants">
                     <h2>Chat Participants</h2>
                     {
@@ -199,16 +208,30 @@ let Chat = ({user}) => {
                         )
                     }
                 </div>
+                </div>
+                <img alt='test' src="https://media1.giphy.com/media/cZ7rmKfFYOvYI/200_d.webp" />
+                <div className="chat">
+                    <h2>Chat</h2>
+                    <div className="chatArea">
+                    {chatWindow()}
+                    </div>
 
-            </div>
+                    <div className="searcher">
+                    <input placeholder="Move Me" onChange={(e) => onChang(e)} value={state.message}></input>
+                    <button onClick={Data.handleAPICall}>Giph Me</button>
+                    {/* <button onClick={leaveRoom}>Leave Room</button> */}
+                    </div>
+                    
+                    <div className='gifTown'>
+                        { gifWindow(gifArray)}
+                    </div>
+                </div>
 
-
-            <button onClick={Data.handleAPICall}>Giph Me</button>
-            {/* <button onClick={joinRoom}>Join Main Room</button> */}
-            <button onClick={leaveRoom}>Leave Room</button>
-
-            <input type="text" placeholder="Enter Room Name" onChange={e => setNewRoom(e.target.value)} />
-            <button onClick={joinRoom}>Create Room</button>
+                
+                
+                
+                
+             </div>
         </>
 
     )
