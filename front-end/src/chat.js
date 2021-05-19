@@ -61,7 +61,7 @@ let Chat = ({user}) => {
      //Have user join main room after login
      useEffect(() => {
         if (state.user) {
-            socket.emit('join', { user: state.user, room: "Custom room" })
+            socket.emit('join', { user: state.user, room: "Main Room" })
         }
     }, [state.user])
 
@@ -80,7 +80,7 @@ let Chat = ({user}) => {
             workable.forEach(el => {
                 console.log("FOREACH LOOP: ", el.images )
 
-                Data.set.push(el.images.fixed_height.webp)
+                Data.set.push(el.images.fixed_height.url)
             })
             setGifArray(arr => [...Data.set])
             Data.set = []
@@ -95,17 +95,16 @@ let Chat = ({user}) => {
       const clickMe = (e) => {
           e.preventDefault();
           console.log(e.target.src)
-        //    setState({...state, message: `${e.target.src}`})
-           socket.emit('message', { message: e.target.src, user: state.user })
+          socket.emit('message', { message: e.target.src, user: state.user, room: activeRoom })
       }
 
       const gifWindow = (data) => {
           console.log('Gif Window: ', data)
           return data.map( el => (
-              
             <div className="gif-prev">
-                <img src={el} alt={el} onClick={(e) => clickMe(e)}/>
+                <img src={el} alt={el} onClick={(e) => clickMe(e)} />
             </div>
+
           ))
       }
 
@@ -143,7 +142,7 @@ let Chat = ({user}) => {
      const chatRooms = () => {
         return rooms.map((room, index) => (
             <div key={index}>
-                <h3>
+                <h3 onClick={e => switchRoom(e)}>
                     {room}
                 </h3>
             </div>
@@ -154,7 +153,10 @@ let Chat = ({user}) => {
     const switchRoom = (e) => {
         let selectedRoom = e.target.getAttribute('room');
         if (activeRoom !== selectedRoom) {
-            socket.emit('leave', { user: state.user, room: activeRoom });
+            if (activeRoom){
+                socket.emit('leave', { user: state.user, room: activeRoom });
+            }
+            
             setChat([]);
             socket.emit('join', { user: state.user, room: selectedRoom });
             setActiveRoom(selectedRoom);
@@ -209,12 +211,9 @@ let Chat = ({user}) => {
                     }
                 </div>
                 </div>
-                <img alt='test' src="https://media1.giphy.com/media/cZ7rmKfFYOvYI/200_d.webp" />
+                {/* <img alt='test' src="https://media1.giphy.com/media/cZ7rmKfFYOvYI/200_d.webp" /> */}
                 <div className="chat">
-                    <h2>Chat</h2>
-                    <div className="chatArea">
-                    {chatWindow()}
-                    </div>
+                    
 
                     <div className="searcher">
                     <input placeholder="Move Me" onChange={(e) => onChang(e)} value={state.message}></input>
@@ -224,6 +223,11 @@ let Chat = ({user}) => {
                     
                     <div className='gifTown'>
                         { gifWindow(gifArray)}
+                    </div>
+                    
+                    <h2>Chat</h2>
+                    <div className="chatArea">
+                    {chatWindow()}
                     </div>
                 </div>
 
