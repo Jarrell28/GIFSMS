@@ -89,7 +89,6 @@ let Chat = ({ user }) => {
 
     //Displays the chat messages
     const chatWindow = () => {
-
         return chat.map(({ message, user, type }, index) => (
             type === 'notification' ?
                 <div key={index}>
