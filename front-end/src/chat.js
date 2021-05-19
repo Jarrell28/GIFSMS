@@ -1,6 +1,5 @@
+import './App.css';
 import React, { useState, useEffect } from 'react';
-import './chat.css';
-
 
 const superagent = require('superagent');
 const io = require('socket.io-client');
@@ -49,11 +48,13 @@ let Chat = ({ user }) => {
         //Once User logs in, updates state for current user
         setState({ ...state, user });
 
-
         //Notifies when user leaves a room
         socket.on('user disconnected', payload => {
             setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has left the room`, user: payload.user }])
         })
+
+
+        // eslint-disable-next-line
     }, [])
 
     //Have user join main room after login
@@ -61,8 +62,9 @@ let Chat = ({ user }) => {
         if (state.user) {
             socket.emit('join', { user: state.user, room: activeRoom })
         }
-    }, [state.user]);
+    }, [state.user])
 
+    // method to fetch Giphy API on chat input
     const Data = { set: [] };
     // `https://api.giphy.com/v1/gifs/search?api_key=${process.env.REACT_APP_GIF_API}&q=${state.message}&limit=5`;
     Data.handleAPICall = async (req, res) => {
@@ -73,12 +75,14 @@ let Chat = ({ user }) => {
             .then(function (superagentResults) {
                 Data.results = superagentResults
                 let workable = Data.results.body.data
+                console.log("WORKING API ------: ", Data.results.body.data)
                 workable.forEach(el => {
-                    console.log("FOREACH LOOP: ", el.images.downsized_small)
+                    console.log("FOREACH LOOP: ", el.images)
 
-                    Data.set.push(el.images.downsized_small.mp4)
-                    console.log(Data.set)
+                    Data.set.push(el.images.fixed_height.webp)
                 })
+                setGifArray(arr => [...Data.set])
+                Data.set = []
                 // console.log("does the state have movement?: ", gifArray)
             })
             .catch(function (error) {
@@ -86,6 +90,24 @@ let Chat = ({ user }) => {
                 // res.status(500).send('we messed up');
             })
     }
+
+    const clickMe = (e) => {
+        e.preventDefault();
+        console.log(e.target.src)
+        //    setState({...state, message: `${e.target.src}`})
+        socket.emit('message', { message: e.target.src, user: state.user, room: activeRoom })
+    }
+
+    const gifWindow = (data) => {
+        console.log('Gif Window: ', data)
+        return data.map(el => (
+
+            <div className="gif-prev">
+                <img src={el} alt={el} onClick={(e) => clickMe(e)} />
+            </div>
+        ))
+    }
+
 
     //Displays the chat messages
     const chatWindow = () => {
@@ -99,8 +121,7 @@ let Chat = ({ user }) => {
                 :
                 <div key={index}>
                     <h2>
-                        {/* {user}: <img alt={index} src={message} /> */}
-                        {user}: {message}
+                        {user}: <img alt={index} src={message} />
                     </h2>
                 </div>
         ))
@@ -131,7 +152,9 @@ let Chat = ({ user }) => {
     const switchRoom = (e) => {
         let selectedRoom = e.target.getAttribute('room');
         if (activeRoom !== selectedRoom) {
-            socket.emit('leave', { user: state.user, room: activeRoom });
+            if (activeRoom) {
+                socket.emit('leave', { user: state.user, room: activeRoom });
+            }
             setChat([]);
             socket.emit('join', { user: state.user, room: selectedRoom });
             setActiveRoom(selectedRoom);
@@ -146,6 +169,7 @@ let Chat = ({ user }) => {
     }
 
     const leaveRoom = () => {
+        setChat([]);
         socket.emit('leave', { user: state.user, room: activeRoom });
         setActiveRoom('');
     }
@@ -154,50 +178,67 @@ let Chat = ({ user }) => {
         socket.emit('message', { message: state.message, user: state.user, room: activeRoom })
     }
 
-    //Add method to fetch Giphy API on chat input
+
 
     return (
         <>
-
             <div className="chat-container">
-                <div className="rooms">
-                    <h2>Chat Rooms</h2>
-                    {
-                        rooms && (
-                            <>
-                                {chatRooms()}
-                            </>
-                        )
-                    }
+                <div className='sidebar'>
+                    <div className="rooms">
+                        <h2>Chat Rooms</h2>
+                        {
+                            rooms && (
+                                <>
+                                    {chatRooms()}
+                                </>
+                            )
+                        }
+                        <input type="text" placeholder="Enter Room Name" onChange={e => setNewRoom(e.target.value)} />
+                        <button onClick={joinRoom}>Create Room</button>
+                        <button onClick={leaveRoom}>Leave Room</button>
+
+                    </div>
+                    <div className="participants">
+                        <h2>Chat Participants</h2>
+                        {
+                            participants && (
+                                <>
+                                    {chatParticipants()}
+                                </>
+                            )
+                        }
+                    </div>
                 </div>
+                <img alt='test' src="https://media1.giphy.com/media/cZ7rmKfFYOvYI/200_d.webp" />
                 <div className="chat">
                     <h2>Chat</h2>
-                    {chatWindow()}
-                    <input placeholder="Enter a message" onChange={(e) => onChang(e)} value={state.message}></input>
-                    <button onClick={sendMessage}>Send Message</button>
-                </div>
-                <div className="participants">
-                    <h2>Chat Participants</h2>
-                    {
-                        participants && (
-                            <>
-                                {chatParticipants()}
-                            </>
-                        )
-                    }
-                </div>
+                    <div className="chatArea">
+                        {chatWindow()}
+                    </div>
 
+                    <div className="searcher">
+                        <input placeholder="Move Me" onChange={(e) => onChang(e)} value={state.message}></input>
+                        <button onClick={Data.handleAPICall}>Giph Me</button>
+                        {/* <button onClick={leaveRoom}>Leave Room</button> */}
+                    </div>
+
+                    <div className='gifTown'>
+                        {gifWindow(gifArray)}
+                    </div>
+                </div>
             </div>
-
-
-            <button onClick={Data.handleAPICall}>Giph Me</button>
-            {/* <button onClick={joinRoom}>Join Main Room</button> */}
-            <button onClick={leaveRoom}>Leave Room</button>
-
-            <input type="text" placeholder="Enter Room Name" onChange={e => setNewRoom(e.target.value)} />
-            <button onClick={joinRoom}>Create Room</button>
         </>
+
     )
 }
 
 export default Chat;
+
+// dropdown results of gif search
+// message constructor
+
+
+
+
+
+
