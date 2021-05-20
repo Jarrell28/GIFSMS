@@ -105,7 +105,7 @@ let Chat = ({ user }) => {
 
     //"translate" API call to Giphy
     const gamble = async (req, res) => {
-        const url = `https://api.giphy.com/v1/gifs/translate?s=${state.message}`;
+        const url = `https://api.giphy.com/v1/gifs/random`;
         superagent.get(url)
             .query({ api_key: `${process.env.REACT_APP_GIF_API}` })
             .then(function (superagentResults) {
@@ -130,12 +130,18 @@ let Chat = ({ user }) => {
     //function to render the gifs from api call
     const gifWindow = (data) => {
         console.log('Gif Window: ', data)
-        return data.map(el => (
+
+        return (<>
+        {data.map(el => (
             <div className="gif-prev">
                 <img src={el} alt={el} onClick={(e) => clickMe(e)} />
             </div>
 
-        ))
+        )
+        )}
+        <div />
+        </>
+        )
     }
 
 
@@ -234,7 +240,7 @@ let Chat = ({ user }) => {
                             <input type="text" placeholder="Enter Room Name" value={newRoom} onChange={e => setNewRoom(e.target.value)} />
                             <button onClick={joinRoom}><i class="fas fa-plus-square"></i></button>
                         </div>
-                        {/* <button onClick={leaveRoom}>Leave Room</button> */}
+                        <button onClick={leaveRoom}>Leave Room</button>
 
                     </div>
                     <div className="participants">
@@ -257,7 +263,7 @@ let Chat = ({ user }) => {
 
                 <div className="searcher">
                     <div className="search-side">
-                        <h2>Go Giff Yourself</h2>
+                        <h2>I'm feeling Gifucky</h2>
                     </div>
                     <input placeholder="Move Me" onChange={(e) => onChang(e)} onKeyDown={(e) => ent(e)} value={state.message}></input>
                     <button onClick={Data.handleAPICall}>Giph Me</button>
