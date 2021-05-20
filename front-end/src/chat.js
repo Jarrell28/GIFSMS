@@ -155,18 +155,22 @@ let Chat = ({ user }) => {
         return (
             chat.map(({ message, user, type }, index) => (
             type === 'notification' ?
+                <>
                 <div key={index} className="notification">
                     <h4>
                         {message}
                     </h4>
                 </div>
+                <div ref={messagesEndRef} />
+                </>
                 :
                 <>
                 <div key={index} className={user === state.user ? "my-message" : "message"}>
-                        <img alt={index} src={message} />
+                        <img alt={index} src={message} /> <br />
                         <h3>{user}</h3>
                 </div>
                 <div ref={messagesEndRef} />
+                <br />
                 </>
         ))
         )
@@ -219,12 +223,12 @@ let Chat = ({ user }) => {
     }
 
     //leave room and update current room
-    const leaveRoom = () => {
-        setChat([]);
-        setParticipants([]);
-        socket.emit('leave', { user: state.user, room: activeRoom });
-        setActiveRoom('');
-    }
+    // const leaveRoom = () => {
+    //     setChat([]);
+    //     setParticipants([]);
+    //     socket.emit('leave', { user: state.user, room: activeRoom });
+    //     setActiveRoom('');
+    // }
 
     //I want to press enter to submit
     const ent = (e) => {
