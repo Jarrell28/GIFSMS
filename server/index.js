@@ -14,6 +14,7 @@ const gifs = io.of('/gifs');
 const gifsRooms = {};
 
 gifs.on('connection', socket => {
+    // console.log('User Joined Chat:' + socket.id);
 
     //Function to have users join rooms
     socket.on('join', payload => {

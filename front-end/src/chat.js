@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 const superagent = require('superagent');
 const io = require('socket.io-client');
 require('dotenv').config();
-const HOST = 'http://localhost:3001';
-// process.env.REACT_APP_HOST || 
+const HOST = process.env.REACT_APP_HOST || 'http://localhost:3001';
 const socket = io.connect(`${HOST}/gifs`);
 
 let Chat = ({ user }) => {
@@ -57,33 +56,61 @@ let Chat = ({ user }) => {
         // eslint-disable-next-line
     }, [])
 
-    //Have user join main room after login
+    // Have user join main room after login
+    // load trending gifs to the gifArray
     useEffect(() => {
         if (state.user) {
-            socket.emit('join', { user: state.user, room: activeRoom })
+            let rez = []
+            let url = `https://api.giphy.com/v1/gifs/trending?limit=5`
+            superagent.get(url)
+                .query({ api_key: `${process.env.REACT_APP_GIF_API}` })
+                .then(function (results) {
+                    let base = results.body.data
+                    console.log("BAAAAASE: ", base)
+                    base.forEach(el => {
+                        rez.push(el.images.fixed_width.url)
+                    })
+
+                    setGifArray(arr => [...rez])
+                })
+                .catch(function (error) {
+                    console.log('Womp Womp', error);
+                    // res.status(500).send('we messed up');
+                })
+            socket.emit('join', { user: state.user, room: "Main Room" })
         }
     }, [state.user])
 
+
+
     // method to fetch Giphy API on chat input
     const Data = { set: [] };
-    // `https://api.giphy.com/v1/gifs/search?api_key=${process.env.REACT_APP_GIF_API}&q=${state.message}&limit=5`;
     Data.handleAPICall = async (req, res) => {
         const url = `https://api.giphy.com/v1/gifs/search?q=${state.message}&limit=5`;
-        console.log("handling: ", process.env.REACT_APP_GIF_API)
         superagent.get(url)
             .query({ api_key: `${process.env.REACT_APP_GIF_API}` })
             .then(function (superagentResults) {
                 Data.results = superagentResults
                 let workable = Data.results.body.data
-                console.log("WORKING API ------: ", Data.results.body.data)
                 workable.forEach(el => {
-                    console.log("FOREACH LOOP: ", el.images)
-
-                    Data.set.push(el.images.fixed_height.webp)
+                    Data.set.push(el.images.fixed_width.url)
                 })
                 setGifArray(arr => [...Data.set])
                 Data.set = []
-                // console.log("does the state have movement?: ", gifArray)
+            })
+            .catch(function (error) {
+                console.log('Womp Womp', error);
+            })
+    }
+
+    //"translate" API call to Giphy
+    const gamble = async (req, res) => {
+        const url = `https://api.giphy.com/v1/gifs/translate?s=${state.message}`;
+        superagent.get(url)
+            .query({ api_key: `${process.env.REACT_APP_GIF_API}` })
+            .then(function (superagentResults) {
+                let workable = superagentResults.body.data
+                socket.emit('message', { message: workable.images.fixed_width.url, user: state.user, room: activeRoom })
             })
             .catch(function (error) {
                 console.log('Womp Womp');
@@ -91,22 +118,23 @@ let Chat = ({ user }) => {
             })
     }
 
+
+    //method for images to send on click
     const clickMe = (e) => {
         e.preventDefault();
-        console.log(e.target.src)
-        //    setState({...state, message: `${e.target.src}`})
-        socket.emit('message', { message: e.target.src, user: state.user, room: activeRoom });
-        setState({ ...state, message: "" });
-        setGifArray([]);
+        console.log(e.target)
+        socket.emit('message', { message: e.target.src, user: state.user, room: activeRoom })
+        setState({ ...state, message: '' })
     }
 
+    //function to render the gifs from api call
     const gifWindow = (data) => {
         console.log('Gif Window: ', data)
         return data.map(el => (
-
             <div className="gif-prev">
                 <img src={el} alt={el} onClick={(e) => clickMe(e)} />
             </div>
+
         ))
     }
 
@@ -175,6 +203,7 @@ let Chat = ({ user }) => {
         setNewRoom('');
     }
 
+    //leave room and update current room
     const leaveRoom = () => {
         setChat([]);
         setParticipants([]);
@@ -182,14 +211,16 @@ let Chat = ({ user }) => {
         setActiveRoom('');
     }
 
-    const sendMessage = () => {
-        socket.emit('message', { message: state.message, user: state.user, room: activeRoom })
+    //I want to press enter to submit
+    const ent = (e) => {
+        if (e.key === "Enter") { Data.handleAPICall() }
     }
+
 
     return (
         <>
             <div className="chat-container">
-                <div className='sidebar'>
+                <div className="side-nav">
                     <div className="rooms">
                         <h2>Chat Rooms</h2>
                         {
@@ -199,9 +230,11 @@ let Chat = ({ user }) => {
                                 </>
                             )
                         }
-                        <input type="text" placeholder="Enter Room Name" value={newRoom} onChange={e => setNewRoom(e.target.value)} />
-                        <button onClick={joinRoom}>Create Room</button>
-                        <button onClick={leaveRoom}>Leave Room</button>
+                        <div className="create-room">
+                            <input type="text" placeholder="Enter Room Name" value={newRoom} onChange={e => setNewRoom(e.target.value)} />
+                            <button onClick={joinRoom}><i class="fas fa-plus-square"></i></button>
+                        </div>
+                        {/* <button onClick={leaveRoom}>Leave Room</button> */}
 
                     </div>
                     <div className="participants">
@@ -215,23 +248,28 @@ let Chat = ({ user }) => {
                         }
                     </div>
                 </div>
-                <img alt='test' src="https://media1.giphy.com/media/cZ7rmKfFYOvYI/200_d.webp" />
                 <div className="chat">
                     <h2>Chat</h2>
                     <div className="chatArea">
                         {chatWindow()}
                     </div>
+                </div>
 
-                    <div className="searcher">
-                        <input placeholder="Move Me" onChange={(e) => onChang(e)} value={state.message}></input>
-                        <button onClick={Data.handleAPICall}>Giph Me</button>
-                        {/* <button onClick={leaveRoom}>Leave Room</button> */}
+                <div className="searcher">
+                    <div className="search-side">
+                        <h2>Go Giff Yourself</h2>
                     </div>
+                    <input placeholder="Move Me" onChange={(e) => onChang(e)} onKeyDown={(e) => ent(e)} value={state.message}></input>
+                    <button onClick={Data.handleAPICall}>Giph Me</button>
+                    <button onClick={gamble}>Giph Me Harder</button>
+
 
                     <div className='gifTown'>
                         {gifWindow(gifArray)}
                     </div>
                 </div>
+
+
             </div>
         </>
 
@@ -239,9 +277,6 @@ let Chat = ({ user }) => {
 }
 
 export default Chat;
-
-// dropdown results of gif search
-// message constructor
 
 
 
