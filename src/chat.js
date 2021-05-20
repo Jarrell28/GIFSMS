@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const superagent = require('superagent');
 const io = require('socket.io-client');
@@ -105,7 +105,7 @@ let Chat = ({ user }) => {
 
     //"translate" API call to Giphy
     const gamble = async (req, res) => {
-        const url = `https://api.giphy.com/v1/gifs/translate?s=${state.message}`;
+        const url = `https://api.giphy.com/v1/gifs/random`;
         superagent.get(url)
             .query({ api_key: `${process.env.REACT_APP_GIF_API}` })
             .then(function (superagentResults) {
@@ -138,24 +138,43 @@ let Chat = ({ user }) => {
         ))
     }
 
+    //set ref to the end of the chat window
+    const messagesEndRef = useRef(null)
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+
+    //watch for changes to chat
+    useEffect(() => {
+        scrollToBottom()
+    }, [chat]);
+
 
     //Displays the chat messages
     const chatWindow = () => {
-        return chat.map(({ message, user, type }, index) => (
-            type === 'notification' ?
-                <div key={index} className="notification">
-                    <h4>
-                        {message}
-                    </h4>
-                </div>
-                :
-                <div key={index} className={user === state.user ? "my-message" : "message"}>
-                    <div>
-                        <img alt={index} src={message} />
-                        <h2>{user}</h2>
-                    </div>
-                </div>
-        ))
+        return (
+            chat.map(({ message, user, type }, index) => (
+                type === 'notification' ?
+                    <>
+                        <div key={index} className="notification">
+                            <h4>
+                                {message}
+                            </h4>
+                        </div>
+                        <div ref={messagesEndRef} />
+                    </>
+                    :
+                    <>
+                        <div key={index} className={user === state.user ? "my-message" : "message"}>
+                            <div>
+                                <img alt={index} src={message} />
+                                <h3>{user}</h3>
+                            </div>
+                        </div>
+                        <div ref={messagesEndRef} />
+                    </>
+            ))
+        )
     }
 
     //Displays the participants
@@ -175,7 +194,7 @@ let Chat = ({ user }) => {
     const chatRooms = () => {
         return rooms.map((room, index) => (
             <div key={index}>
-                <h3 room={room} onClick={switchRoom}>
+                <h3 room={room} onClick={switchRoom} className={room === activeRoom ? "" : "room-hover"}>
                     {room} {room === activeRoom ? " - active" : ""}
                 </h3>
             </div>
@@ -205,12 +224,12 @@ let Chat = ({ user }) => {
     }
 
     //leave room and update current room
-    const leaveRoom = () => {
-        setChat([]);
-        setParticipants([]);
-        socket.emit('leave', { user: state.user, room: activeRoom });
-        setActiveRoom('');
-    }
+    // const leaveRoom = () => {
+    //     setChat([]);
+    //     setParticipants([]);
+    //     socket.emit('leave', { user: state.user, room: activeRoom });
+    //     setActiveRoom('');
+    // }
 
     //I want to press enter to submit
     const ent = (e) => {
@@ -252,7 +271,7 @@ let Chat = ({ user }) => {
                 <div className="chat">
                     <h2>Chat</h2>
                     <div className="chatArea">
-                        {chatWindow()}
+                        {chatWindow(chat)}
                     </div>
                 </div>
 
