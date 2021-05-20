@@ -30,7 +30,7 @@
 .chatArea{
   display: flex;
   text-align: center;
-  padding: 30px 45px;
+  padding: 30px 10%;
   flex-direction: column;
 }
 
@@ -126,9 +126,14 @@
  }
 
  .search-gifs {
-   display: flex;
-   align-items: stretch;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  margin-bottom: 15px;
+ }
 
+ .search-gifs input{
+   border:none;
  }
 
  .searcher button {
@@ -139,7 +144,8 @@
   font-size: 16px;
   border-radius: 2px;
   cursor: pointer;
-  transition: .2s all
+  transition: all .2s;
+  padding: 5px 7px;
  }
 
  .searcher button:hover {
