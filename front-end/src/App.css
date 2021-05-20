@@ -57,6 +57,8 @@
   grid-area: 1 / 2 / 2 / 3;
   height: 100vh;
   background-color: tan;
+  bottom:0;
+  overflow-y: scroll;
 }
 
 .gifTown{

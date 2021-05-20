@@ -98,6 +98,10 @@ let Chat = ({ user }) => {
     }
   }, [state.user]);
 
+  useEffect(()=> {
+    
+  })
+
   // method to fetch Giphy API on chat input
   const Data = { set: [] };
   Data.handleAPICall = async (req, res) => {
