@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 const superagent = require('superagent');
 const io = require('socket.io-client');
 require('dotenv').config();
-const HOST = process.env.REACT_APP_HOST || 'http://localhost:3001';
+const HOST = 'http://localhost:3001';
+// process.env.REACT_APP_HOST || 
 const socket = io.connect(`${HOST}/gifs`);
 
 let Chat = ({ user }) => {
@@ -53,7 +54,6 @@ let Chat = ({ user }) => {
             setChat(arr => [...arr, { type: "notification", message: `User ${payload.user} has left the room`, user: payload.user }])
         })
 
-
         // eslint-disable-next-line
     }, [])
 
@@ -95,7 +95,9 @@ let Chat = ({ user }) => {
         e.preventDefault();
         console.log(e.target.src)
         //    setState({...state, message: `${e.target.src}`})
-        socket.emit('message', { message: e.target.src, user: state.user, room: activeRoom })
+        socket.emit('message', { message: e.target.src, user: state.user, room: activeRoom });
+        setState({ ...state, message: "" });
+        setGifArray([]);
     }
 
     const gifWindow = (data) => {
@@ -129,13 +131,15 @@ let Chat = ({ user }) => {
 
     //Displays the participants
     const chatParticipants = () => {
-        return participants.map((user, index) => (
+        return activeRoom ? participants.map((user, index) => (
             <div key={index}>
                 <h3>
                     {user}
                 </h3>
             </div>
         ))
+
+            : ""
     }
 
     //Displays the chat rooms
@@ -163,13 +167,17 @@ let Chat = ({ user }) => {
 
     //Users should be able to create own public rooms or private rooms to specific users
     const joinRoom = () => {
-        setChat([]);
-        socket.emit('join', { user: state.user, room: newRoom });
-        setActiveRoom(newRoom);
+        if (newRoom) {
+            setChat([]);
+            socket.emit('join', { user: state.user, room: newRoom });
+            setActiveRoom(newRoom);
+        }
+        setNewRoom('');
     }
 
     const leaveRoom = () => {
         setChat([]);
+        setParticipants([]);
         socket.emit('leave', { user: state.user, room: activeRoom });
         setActiveRoom('');
     }
@@ -177,8 +185,6 @@ let Chat = ({ user }) => {
     const sendMessage = () => {
         socket.emit('message', { message: state.message, user: state.user, room: activeRoom })
     }
-
-
 
     return (
         <>
@@ -193,7 +199,7 @@ let Chat = ({ user }) => {
                                 </>
                             )
                         }
-                        <input type="text" placeholder="Enter Room Name" onChange={e => setNewRoom(e.target.value)} />
+                        <input type="text" placeholder="Enter Room Name" value={newRoom} onChange={e => setNewRoom(e.target.value)} />
                         <button onClick={joinRoom}>Create Room</button>
                         <button onClick={leaveRoom}>Leave Room</button>
 
