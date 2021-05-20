@@ -143,16 +143,17 @@ let Chat = ({ user }) => {
     const chatWindow = () => {
         return chat.map(({ message, user, type }, index) => (
             type === 'notification' ?
-                <div key={index}>
+                <div key={index} className="notification">
                     <h4>
                         {message}
                     </h4>
                 </div>
                 :
-                <div key={index}>
-                    <h2>
-                        {user}: <img alt={index} src={message} />
-                    </h2>
+                <div key={index} className={user === state.user ? "my-message" : "message"}>
+                    <div>
+                        <img alt={index} src={message} />
+                        <h2>{user}</h2>
+                    </div>
                 </div>
         ))
     }
@@ -173,8 +174,8 @@ let Chat = ({ user }) => {
     //Displays the chat rooms
     const chatRooms = () => {
         return rooms.map((room, index) => (
-            <div key={index} onClick={switchRoom}>
-                <h3 room={room}>
+            <div key={index}>
+                <h3 room={room} onClick={switchRoom}>
                     {room} {room === activeRoom ? " - active" : ""}
                 </h3>
             </div>
@@ -231,7 +232,7 @@ let Chat = ({ user }) => {
                             )
                         }
                         <div className="create-room">
-                            <input type="text" placeholder="Enter Room Name" value={newRoom} onChange={e => setNewRoom(e.target.value)} />
+                            <input type="text" placeholder="Create Room" value={newRoom} onChange={e => setNewRoom(e.target.value)} />
                             <button onClick={joinRoom}><i class="fas fa-plus-square"></i></button>
                         </div>
                         {/* <button onClick={leaveRoom}>Leave Room</button> */}
@@ -259,8 +260,11 @@ let Chat = ({ user }) => {
                     <div className="search-side">
                         <h2>Go Giff Yourself</h2>
                     </div>
-                    <input placeholder="Move Me" onChange={(e) => onChang(e)} onKeyDown={(e) => ent(e)} value={state.message}></input>
-                    <button onClick={Data.handleAPICall}>Giph Me</button>
+                    <div className="search-gifs">
+                        <input placeholder="Giphys" type="text" onChange={(e) => onChang(e)} onKeyDown={(e) => ent(e)} value={state.message} />
+                        <button onClick={Data.handleAPICall}>Giph Me</button>
+                    </div>
+
                     <button onClick={gamble}>Giph Me Harder</button>
 
 

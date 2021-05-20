@@ -23,12 +23,36 @@
   grid-column-gap: 0px;
   grid-row-gap: 0px;
   min-height: 100vh;
-  background-color: tan;
+  background-color: slategray;
   overflow:auto;
 }
 
 .chatArea{
+  display: flex;
+  text-align: center;
+  padding: 30px 45px;
+  flex-direction: column;
+}
+
+.message {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.my-message {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.message, .my-message h2{
+  margin: 10px 0 35px;
+}
+
+.notification h4 {
+  color: #fff;
+  text-align: center;
   justify-content: center;
+  margin-top:0;
 }
 
 .side-nav{
@@ -39,31 +63,46 @@
   z-index: 1;
   justify-content: center;
   background-color: slategray;
-  box-shadow: 8px 5px 20px grey;
+  /* box-shadow: 8px 5px 20px grey; */
   overflow: auto;
+  border-right: 1px solid #fff;
+  padding: 0 30px;
 }
 
 .rooms{
   display: grid;
   justify-content: stretch;
-  padding: 0 30px;
 }
 
 .participants{
   display: grid;
   justify-content: center;
+  margin-top: 40px;
+}
+
+.participants h3{
+  margin: 10px 0;
 }
 
 .chat{
   grid-area: 1 / 2 / 2 / 3;
   height: 100vh;
-  background-color: tan;
+  /* background-color: tan; */
 }
 
 .gifTown{
   display: flex;
   flex-direction: column;
   align-content: center;
+  margin-top: 30px;
+}
+
+.gif-prev {
+  margin-bottom: 7px;
+}
+
+.gif-prev img {
+  cursor: pointer;
 }
 
 
@@ -73,15 +112,39 @@
   justify-content: center;
   right: 0;
   z-index: 1;
-  box-shadow: -8px 5px 20px grey;
+  /* box-shadow: -8px 5px 20px grey; */
   background-color: slategray;
   overflow: auto;
+  border-left: 1px solid #fff;
+  padding: 0 30px;
  }
  
  .search-side{
-  height: 150px;
   justify-content: center;
   padding-top: 5px;
+  margin-bottom: 50px;
+ }
+
+ .search-gifs {
+   display: flex;
+   align-items: stretch;
+
+ }
+
+ .searcher button {
+  background: transparent;
+  border: 1px solid #fff;
+  outline: none;
+  color: #fff;
+  font-size: 16px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: .2s all
+ }
+
+ .searcher button:hover {
+  background: #fff;
+  color: slategray;
  }
 
 input[type="text"] {
@@ -91,22 +154,26 @@ input[type="text"] {
 .create-room {
   display: flex;
   height: 35px;
+  align-items: center;
+  justify-content: center;
 }
 
 .create-room button {
-  background: #fff;
+  background: transparent;
   outline: none;
   border: none;
   color: #fff;
   padding: 0;
   font-size: 36px;
-  align-self: stretch;
   position: relative;
   cursor: pointer;
+  align-self: stretch;
+  display: flex;
 }
 
-.create-room button i {
+/* .create-room button i {
   height: 100%;
   position: absolute;
   top: 0;
-}
+} */
+
