@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const superagent = require('superagent');
 const io = require('socket.io-client');
@@ -66,7 +66,6 @@ let Chat = ({ user }) => {
                 .query({ api_key: `${process.env.REACT_APP_GIF_API}` })
                 .then(function (results) {
                     let base = results.body.data
-                    console.log("BAAAAASE: ", base)
                     base.forEach(el => {
                         rez.push(el.images.fixed_width.url)
                     })
@@ -122,14 +121,12 @@ let Chat = ({ user }) => {
     //method for images to send on click
     const clickMe = (e) => {
         e.preventDefault();
-        console.log(e.target)
         socket.emit('message', { message: e.target.src, user: state.user, room: activeRoom })
         setState({ ...state, message: '' })
     }
 
     //function to render the gifs from api call
     const gifWindow = (data) => {
-        console.log('Gif Window: ', data)
         return data.map(el => (
             <div className="gif-prev">
                 <img src={el} alt={el} onClick={(e) => clickMe(e)} />
@@ -138,23 +135,40 @@ let Chat = ({ user }) => {
         ))
     }
 
+    //set ref to the end of the chat window
+    const messagesEndRef = useRef(null)
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+
+    //watch for changes to chat
+    useEffect(() => {
+        scrollToBottom()
+    }, [chat]);
+
 
     //Displays the chat messages
     const chatWindow = () => {
         return chat.map(({ message, user, type }, index) => (
             type === 'notification' ?
-                <div key={index} className="notification">
-                    <h4>
-                        {message}
-                    </h4>
-                </div>
-                :
-                <div key={index} className={user === state.user ? "my-message" : "message"}>
-                    <div>
-                        <img alt={index} src={message} />
-                        <h2>{user}</h2>
+                <>
+                    <div key={index} className="notification">
+                        <h4>
+                            {message}
+                        </h4>
                     </div>
-                </div>
+                    <div ref={messagesEndRef} />
+                </>
+                :
+                <>
+                    <div key={index} className={user === state.user ? "my-message" : "message"}>
+                        <div>
+                            <img alt={index} src={message} />
+                            <h2>{user}</h2>
+                        </div>
+                    </div>
+                    <div ref={messagesEndRef} />
+                </>
         ))
     }
 
@@ -258,14 +272,14 @@ let Chat = ({ user }) => {
 
                 <div className="searcher">
                     <div className="search-side">
-                        <h2>Go Giff Yourself</h2>
+                        <h2>Giphys</h2>
                     </div>
                     <div className="search-gifs">
-                        <input placeholder="Giphys" type="text" onChange={(e) => onChang(e)} onKeyDown={(e) => ent(e)} value={state.message} />
+                        <input placeholder="Search Giphs" type="text" onChange={(e) => onChang(e)} onKeyDown={(e) => ent(e)} value={state.message} />
                         <button onClick={Data.handleAPICall}>Giph Me</button>
                     </div>
 
-                    <button onClick={gamble}>Giph Me Harder</button>
+                    <button onClick={gamble}>Random Giph!</button>
 
 
                     <div className='gifTown'>

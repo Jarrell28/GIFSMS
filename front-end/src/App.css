@@ -60,6 +60,7 @@
   height: 100vh;
   top: 0;
   left: 0;
+  position: fixed;
   z-index: 1;
   justify-content: center;
   background-color: slategray;
@@ -73,6 +74,11 @@
   display: grid;
   justify-content: stretch;
 }
+
+.rooms h3 {
+  margin: 10px 0;
+}
+
 
 .participants{
   display: grid;
@@ -110,13 +116,14 @@
   grid-area: 1 / 3 / 2 / 4;
   height: 100vh;
   justify-content: center;
+  position: fixed;
   right: 0;
   z-index: 1;
   /* box-shadow: -8px 5px 20px grey; */
   background-color: slategray;
   overflow: auto;
   border-left: 1px solid #fff;
-  padding: 0 30px;
+  padding: 0 15px;
  }
  
  .search-side{
@@ -162,6 +169,7 @@ input[type="text"] {
   height: 35px;
   align-items: center;
   justify-content: center;
+  margin-top: 25px;
 }
 
 .create-room button {
