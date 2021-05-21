@@ -1,8 +1,15 @@
 'use strict';
 
-const PORT = process.env.PORT || 3001;
+const express = require('express');
+const PORT = process.env.PORT || 3000;
+const INDEX = '/index.html';
 
-const io = require('socket.io')(PORT, {
+const server = express()
+    .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+    .listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+
+const io = require('socket.io')(server, {
     cors: {
         origin: "*",
     }
@@ -14,7 +21,7 @@ const gifs = io.of('/gifs');
 const gifsRooms = {};
 
 gifs.on('connection', socket => {
-    // console.log('User Joined Chat:' + socket.id);
+    console.log('User Joined Chat:' + socket.id);
 
     //Function to have users join rooms
     socket.on('join', payload => {
